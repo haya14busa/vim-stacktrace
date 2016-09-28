@@ -1,4 +1,4 @@
-package main
+package callstack
 
 import (
 	"fmt"
@@ -217,8 +217,7 @@ func (h *myHandler) Serve(cli *vim.Client, msg *vim.Message) {
 	}
 }
 
-func main() {
-
+func Main() {
 	usr, _ := user.Current()
 	homedir = usr.HomeDir
 
