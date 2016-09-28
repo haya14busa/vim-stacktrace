@@ -21,11 +21,14 @@ function! s:separator() abort
   return fnamemodify('.', ':p')[-1 :]
 endfunction
 
+let s:is_windows = has('win16') || has('win32') || has('win64') || has('win95')
+
 let s:base = expand('<sfile>:p:h:h')
-let s:cmd = s:base . s:separator() . fnamemodify(s:base, ':t')
+let s:basecmd = s:base . s:separator() . fnamemodify(s:base, ':t')
+let s:cmd = s:basecmd . (s:is_windows ? '.exe' : '')
 
 if g:callstack#debug
-  let s:cmd = ['go', 'run', s:cmd . '.go']
+  let s:cmd = ['go', 'run', s:basecmd . '.go']
 elseif !filereadable(s:cmd)
   call system(printf("cd %s && go get -d && go build", s:base))
 endif
