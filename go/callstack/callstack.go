@@ -183,7 +183,9 @@ func (cli *Vim) buildEntry(funcname string, flnum int) (*Entry, error) {
 	e.Text += e.Line
 
 	if e.Filename != "" {
-		e.Lnum = cli.funcLnum(funcname, file) + flnum
+		if l := cli.funcLnum(funcname, file); l > 0 {
+			e.Lnum = l + flnum
+		}
 	}
 
 	return e, nil
