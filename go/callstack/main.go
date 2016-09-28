@@ -14,14 +14,34 @@ type myHandler struct{}
 
 func (h *myHandler) Serve(cli *vim.Client, msg *vim.Message) {
 	if msg.MsgID > 0 {
-		r, err := (&Vim{c: cli}).callstack()
-		var body interface{} = r
-		if err != nil {
-			body = &Err{Error: err.Error()}
+
+		body, ok := msg.Body.(map[string]interface{})
+		if !ok {
+			return
 		}
+		id, ok := body["id"]
+		if !ok {
+			return
+		}
+
+		v := &Vim{c: cli}
+
+		var ret interface{}
+
+		if s, ok := id.(string); ok {
+			switch s {
+			case "callstack#get":
+				r, err := v.Callstack()
+				if err != nil {
+					ret = &Err{Error: err.Error()}
+				}
+				ret = r
+			}
+		}
+
 		cli.Send(&vim.Message{
 			MsgID: msg.MsgID,
-			Body:  body,
+			Body:  ret,
 		})
 	}
 }

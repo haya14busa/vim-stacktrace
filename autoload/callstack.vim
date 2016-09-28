@@ -7,10 +7,10 @@ scriptencoding utf-8
 let s:save_cpo = &cpo
 set cpo&vim
 
-let g:callstack#debug = v:false
+let g:callstack#debug = v:true
 
 function! callstack#get() abort
-  return ch_evalexpr(s:job_start(), 0)
+  return ch_evalexpr(s:job_start(), {'id': 'callstack#get'})
 endfunction
 
 function! s:err_cb(ch, msg) abort

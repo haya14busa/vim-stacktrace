@@ -76,7 +76,7 @@ func (cli *Vim) callstrfunc(f string, args ...interface{}) (string, error) {
 	return "", fmt.Errorf("%v(%v) is not string: %v", f, args, ret)
 }
 
-func (cli *Vim) callstack() (*Callstack, error) {
+func (cli *Vim) Callstack() (*Callstack, error) {
 	sfile, err := cli.sfile()
 	if err != nil {
 		return nil, err

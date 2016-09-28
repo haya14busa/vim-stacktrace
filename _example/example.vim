@@ -19,6 +19,8 @@ function! s:test3() abort
 endfunction
 
 if expand('%:p') ==# expand('<sfile>:p') || expand('%:p') ==# ''
+  call ch_logfile('/tmp/vimchlog.txt', 'w')
+  echom string(s:test())
   call setqflist(s:test().entries)
   copen
   cfirst
