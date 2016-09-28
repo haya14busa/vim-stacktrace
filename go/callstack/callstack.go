@@ -3,6 +3,7 @@ package callstack
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -141,8 +142,15 @@ func normalizeThrowpoint(throwpoint string) string {
 	return throwpoint
 }
 
+var allNumRegex = regexp.MustCompile(`^\d+$`)
+
 // e: {funcname}[{line}]
 func (cli *Vim) buildEntry(funcname string, flnum int) (*Entry, error) {
+	// convert funcname for dict func
+	if allNumRegex.MatchString(funcname) {
+		funcname = fmt.Sprintf("{%v}", funcname)
+	}
+
 	e := &Entry{
 		Funcname: funcname,
 		Flnum:    flnum,
@@ -151,6 +159,7 @@ func (cli *Vim) buildEntry(funcname string, flnum int) (*Entry, error) {
 
 	f, err := cli.function(funcname)
 	if err != nil {
+		// It failse for lambda and partial
 		return e, nil
 	}
 	lines := strings.Split(strings.Trim(f, "\n"), "\n")

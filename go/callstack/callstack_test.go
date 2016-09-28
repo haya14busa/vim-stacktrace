@@ -82,6 +82,18 @@ func TestVim_Build(t *testing.T) {
 				},
 			},
 		},
+		{
+			in: "function 14[14]",
+			want: &Callstack{
+				Entries: []*Entry{
+					{
+						Funcname: "{14}",
+						Flnum:    14,
+						Text:     "{14}:14:",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		got, err := v.Build(tt.in)
@@ -89,7 +101,10 @@ func TestVim_Build(t *testing.T) {
 			t.Error(err)
 		}
 		if !reflect.DeepEqual(got, tt.want) {
-			t.Errorf("Vim.Build(%v) = %#+v, want %#+v", got, tt.want)
+			for i, e := range got.Entries {
+				t.Errorf("got :%#v", e)
+				t.Errorf("want:%#v", tt.want.Entries[i])
+			}
 		}
 	}
 }
@@ -103,6 +118,11 @@ function! F() abort
 endfunction
 
 function! s:test() abort
+  return s:d.f()
+endfunction
+
+let s:d = {}
+function! s:d.f() abort
   return s:test2()
 endfunction
 
@@ -140,17 +160,24 @@ endfunction
 			&Entry{
 				Funcname: "<SNR>2_test",
 				Flnum:    1,
-				Line:     "  return s:test2()",
+				Line:     "  return s:d.f()",
 				Filename: filename,
 				Lnum:     8,
-				Text:     "<SNR>2_test:1:  return s:test2()",
+				Text:     "<SNR>2_test:1:  return s:d.f()",
+			},
+			&Entry{
+				Funcname: "{1}",
+				Flnum:    1,
+				Line:     "  return s:test2()",
+				Filename: filename,
+				Text:     "{1}:1:  return s:test2()",
 			},
 			&Entry{
 				Funcname: "<SNR>2_test2",
 				Flnum:    1,
 				Line:     `  return printf('%s[%s]', expand('<sfile>'), expand('<slnum>'))`,
 				Filename: filename,
-				Lnum:     12,
+				Lnum:     17,
 				Text:     `<SNR>2_test2:1:  return printf('%s[%s]', expand('<sfile>'), expand('<slnum>'))`,
 			},
 		},
@@ -168,8 +195,10 @@ endfunction
 	}
 	if !reflect.DeepEqual(got, want) {
 		for i, e := range got.Entries {
-			t.Errorf("got :%#v", e)
-			t.Errorf("want:%#v", want.Entries[i])
+			if !reflect.DeepEqual(e, want.Entries[i]) {
+				t.Errorf("got :%#v", e)
+				t.Errorf("want:%#v", want.Entries[i])
+			}
 		}
 	}
 }
