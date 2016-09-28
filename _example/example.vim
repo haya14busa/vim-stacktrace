@@ -19,7 +19,6 @@ function! s:test3() abort
 endfunction
 
 if expand('%:p') ==# expand('<sfile>:p') || expand('%:p') ==# ''
-  echom string(s:test())
   call setqflist(s:test().entries)
   copen
   cfirst

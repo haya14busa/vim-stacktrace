@@ -26,6 +26,8 @@ let s:cmd = s:base . s:separator() . fnamemodify(s:base, ':t')
 
 if g:callstack#debug
   let s:cmd = ['go', 'run', s:cmd . '.go']
+elseif !filereadable(s:cmd)
+  call system(printf("cd %s && go get -d && go build", s:base))
 endif
 
 let s:option = {
