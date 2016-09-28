@@ -81,9 +81,15 @@ func (cli *Vim) Callstack() (*Callstack, error) {
 	if err != nil {
 		return nil, err
 	}
+	ss := strings.Split(sfile, "..")
+	throwpoint := strings.Join(ss[:len(ss)-1], "..")
+	return cli.build(throwpoint)
+}
 
-	if !strings.HasPrefix(sfile, "function ") {
-		return nil, fmt.Errorf("expand(<sfile>) doesn't called in function")
+// throwpoint should be normalized
+func (cli *Vim) build(throwpoint string) (*Callstack, error) {
+	if !strings.HasPrefix(throwpoint, "function ") {
+		return nil, fmt.Errorf("doesn't called in function")
 	}
 
 	fileFuncLinesMu.Lock()
@@ -91,8 +97,7 @@ func (cli *Vim) Callstack() (*Callstack, error) {
 	fileFuncLinesMu.Unlock()
 
 	var es []*Entry
-	ss := strings.Split(sfile[len("function "):], "..")
-	ss = ss[:len(ss)-1] // trim last callstack#get() one
+	ss := strings.Split(throwpoint[len("function "):], "..")
 	for _, e := range ss {
 		i := strings.Index(e, "[")
 		funcname := e[:i]
@@ -107,6 +112,33 @@ func (cli *Vim) Callstack() (*Callstack, error) {
 		es = append(es, e)
 	}
 	return &Callstack{Entries: es}, nil
+}
+
+func (cli *Vim) Build(throwpoint string) (*Callstack, error) {
+	return cli.build(normalizeThrowpoint(throwpoint))
+}
+
+// function <SNR>13_test[1]..<SNR>13_test2[1]..F[3]..<lambda>1[1]..<SNR>13_test3, line 2
+// Error detected while processing function <SNR>13_test[1]..<SNR>13_test3:
+// line    2:
+func normalizeThrowpoint(throwpoint string) string {
+	i := strings.Index(throwpoint, ", line ")
+	if i != -1 {
+		lnum := throwpoint[i+len(", line "):]
+		return fmt.Sprintf("%s[%s]", throwpoint[:i], lnum)
+	}
+
+	if strings.HasPrefix(throwpoint, "Error detected while processing ") {
+		throwpoint = throwpoint[len("Error detected while processing "):]
+	}
+
+	j := strings.Index(throwpoint, ":\nline")
+	if j != -1 {
+		lnum := strings.TrimLeft(throwpoint[j+len(":\nline"):len(throwpoint)-1], " ")
+		return fmt.Sprintf("%s[%s]", throwpoint[:j], lnum)
+	}
+
+	return throwpoint
 }
 
 // e: {funcname}[{line}]
@@ -147,7 +179,7 @@ func (cli *Vim) buildEntry(funcname string, flnum int) (*Entry, error) {
 	}
 	lastl := lines[len(lines)-2]
 	numfield := lastl[:strings.Index(lastl, " ")]
-	e.Line = lines[targeti][len(numfield)+1:]
+	e.Line = lines[targeti][len(numfield)+2:]
 	e.Text += e.Line
 
 	if e.Filename != "" {

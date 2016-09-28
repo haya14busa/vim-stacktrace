@@ -36,6 +36,20 @@ func (h *myHandler) Serve(cli *vim.Client, msg *vim.Message) {
 					ret = &Err{Error: err.Error()}
 				}
 				ret = r
+
+			case "callstack#build":
+				t, ok := body["throwpoint"]
+				if !ok {
+					ret = &Err{Error: "throwpoint is required"}
+				} else if _, ok := t.(string); !ok {
+					ret = &Err{Error: "throwpoint is not string"}
+				} else {
+					r, err := v.Build(t.(string))
+					if err != nil {
+						ret = &Err{Error: err.Error()}
+					}
+					ret = r
+				}
 			}
 		}
 

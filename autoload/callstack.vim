@@ -13,6 +13,10 @@ function! callstack#get() abort
   return ch_evalexpr(s:job_start(), {'id': 'callstack#get'})
 endfunction
 
+function! callstack#build(throwpoint) abort
+  return ch_evalexpr(s:job_start(), {'id': 'callstack#build', 'throwpoint': a:throwpoint})
+endfunction
+
 function! s:err_cb(ch, msg) abort
   echom 'vim-callstack:' . a:msg
 endfunction
