@@ -100,13 +100,7 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	var es []*Entry
 	ss := strings.Split(throwpoint[len("function "):], "..")
 	for _, e := range ss {
-		i := strings.Index(e, "[")
-		funcname := e
-		flnum := 0
-		if i != -1 {
-			funcname = e[:i]
-			flnum, _ = strconv.Atoi(e[i+1 : len(e)-1])
-		}
+		funcname, flnum := separateEntry(e)
 		e, err := cli.buildEntry(funcname, flnum)
 		if err != nil {
 			return nil, err
@@ -114,6 +108,20 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 		es = append(es, e)
 	}
 	return &Stacktrace{Entries: es}, nil
+}
+
+// separateEntry separtes entry which form is body[lnum] and return (body, lnum)
+// funcname[1] -> (funcname, 1)
+// file[1] -> (file, 1)
+func separateEntry(e string) (string, int) {
+	i := strings.LastIndex(e, "[")
+	body := e
+	line := 0
+	if i != -1 {
+		body = e[:i]
+		line, _ = strconv.Atoi(e[i+1 : len(e)-1])
+	}
+	return body, line
 }
 
 func (cli *Vim) Build(throwpoint string) (*Stacktrace, error) {

@@ -216,6 +216,50 @@ endfunction
 	}
 }
 
+func TestSeparateEntry(t *testing.T) {
+	tests := []struct {
+		in       string
+		wantBody string
+		wantLnum int
+	}{
+		{
+			in:       "<SNR>13_test[1]",
+			wantBody: "<SNR>13_test",
+			wantLnum: 1,
+		},
+		{
+			in:       "<lambda>3[1]",
+			wantBody: "<lambda>3",
+			wantLnum: 1,
+		},
+		{
+			in:       "F[100]",
+			wantBody: "F",
+			wantLnum: 100,
+		},
+		{
+			in:       "/path/to/file[14]",
+			wantBody: "/path/to/file",
+			wantLnum: 14,
+		},
+		{
+			in:       "[14].vim[24]",
+			wantBody: "[14].vim",
+			wantLnum: 24,
+		},
+		{
+			in:       "<SNR>14_nolnum",
+			wantBody: "<SNR>14_nolnum",
+			wantLnum: 0,
+		},
+	}
+	for _, tt := range tests {
+		if gotBody, gotLnum := separateEntry(tt.in); gotBody != tt.wantBody || gotLnum != tt.wantLnum {
+			t.Errorf("separateEntry(%v) = (%v, %v), want (%v, %v)", tt.in, gotBody, gotLnum, tt.wantBody, tt.wantLnum)
+		}
+	}
+}
+
 func TestNormalizeThrowpoint(t *testing.T) {
 
 	tests := []struct {
