@@ -20,7 +20,6 @@ endfunction
 
 function! Main() abort
   call ch_logfile('/tmp/vimchlog.txt', 'w')
-  echom string(s:test())
   call setqflist(s:test().stacks)
   copen
   cfirst

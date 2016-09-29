@@ -11,25 +11,6 @@ import (
 	vim "github.com/haya14busa/vim-go-client"
 )
 
-var cli *vim.Client
-
-var vimArgs = []string{"-Nu", "NONE", "-i", "NONE", "-n"}
-
-type testHandler struct{}
-
-func (h *testHandler) Serve(cli *vim.Client, msg *vim.Message) {}
-
-func TestMain(m *testing.M) {
-	c, closer, err := vim.NewChildClient(&testHandler{}, vimArgs)
-	if err != nil {
-		log.Fatal(err)
-	}
-	cli = c
-	code := m.Run()
-	closer.Close()
-	os.Exit(code)
-}
-
 func TestVim_Build(t *testing.T) {
 	v := &Vim{c: cli}
 	tests := []struct {
@@ -178,7 +159,7 @@ endfunction
 	// /path/to/file.vim:18: <SNR>2_test2:2:    throw 'error!'
 }
 
-func TestVim_Build_intergration(t *testing.T) {
+func TestVim_Build_integration(t *testing.T) {
 	v := &Vim{c: cli}
 	scripts := `
 function! F() abort
@@ -210,7 +191,7 @@ endfunction
 
 	want := &Stacktrace{
 		Stacks: []*Stack{
-			&Stack{
+			{
 				Funcname: "F",
 				Flnum:    2,
 				Line:     "  return l:G()",
@@ -218,7 +199,7 @@ endfunction
 				Lnum:     4,
 				Text:     "F:2:  return l:G()",
 			},
-			&Stack{
+			{
 				Funcname: "<lambda>1",
 				Flnum:    1,
 				Line:     "",
@@ -226,7 +207,7 @@ endfunction
 				Lnum:     0,
 				Text:     "<lambda>1:1:",
 			},
-			&Stack{
+			{
 				Funcname: "<SNR>2_test",
 				Flnum:    1,
 				Line:     "  return s:d.f()",
@@ -234,14 +215,14 @@ endfunction
 				Lnum:     8,
 				Text:     "<SNR>2_test:1:  return s:d.f()",
 			},
-			&Stack{
+			{
 				Funcname: "{1}",
 				Flnum:    1,
 				Line:     "  return s:test2()",
 				Filename: filename,
 				Text:     "{1}:1:  return s:test2()",
 			},
-			&Stack{
+			{
 				Funcname: "<SNR>2_test2",
 				Flnum:    1,
 				Line:     `  return printf('%s[%s]', expand('<sfile>'), expand('<slnum>'))`,

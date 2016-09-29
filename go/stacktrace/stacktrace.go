@@ -66,16 +66,12 @@ type Vim struct {
 	c *vim.Client
 }
 
-func (cli *Vim) debug(msg interface{}) {
-	cli.c.Ex("echom " + strconv.Quote(fmt.Sprintf("%+#v", msg)))
-}
+// func (cli *Vim) debug(msg interface{}) {
+// 	cli.c.Ex("echom " + strconv.Quote(fmt.Sprintf("%+#v", msg)))
+// }
 
 func (cli *Vim) sfile() (string, error) {
 	return cli.callstrfunc("expand", "<sfile>")
-}
-
-func (cli *Vim) slnum() (string, error) {
-	return cli.callstrfunc("expand", "<slnum>")
 }
 
 func (cli *Vim) function(funcname string) (string, error) {
@@ -142,7 +138,7 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	return &Stacktrace{Stacks: es}, nil
 }
 
-// separateStack separtes stack entry which form is body[lnum] and return (body, lnum)
+// separateStack separates stack entry which form is body[lnum] and return (body, lnum)
 // funcname[1] -> (funcname, 1)
 // file[1] -> (file, 1)
 func separateStack(e string) (string, int) {

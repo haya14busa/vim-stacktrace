@@ -1,0 +1,23 @@
+language: go
+
+go:
+  - 1.7
+  - tip
+
+os:
+  - linux
+#   - osx
+# osx_image: xcode8
+
+install:
+  - make deps
+  - bash .ci/install.sh
+  - export PATH=$HOME/vim/bin:$PATH
+
+before_script:
+  - make check
+
+script:
+  - make lint
+  - make test
+  - goveralls -service=travis-ci
