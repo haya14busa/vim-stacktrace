@@ -159,7 +159,7 @@ endfunction
 	// /path/to/file.vim:18: <SNR>2_test2:2:    throw 'error!'
 }
 
-func TestVim_Build_intergration(t *testing.T) {
+func TestVim_Build_integration(t *testing.T) {
 	v := &Vim{c: cli}
 	scripts := `
 function! F() abort

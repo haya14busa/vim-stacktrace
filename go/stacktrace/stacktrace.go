@@ -138,7 +138,7 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	return &Stacktrace{Stacks: es}, nil
 }
 
-// separateStack separtes stack entry which form is body[lnum] and return (body, lnum)
+// separateStack separates stack entry which form is body[lnum] and return (body, lnum)
 // funcname[1] -> (funcname, 1)
 // file[1] -> (file, 1)
 func separateStack(e string) (string, int) {
