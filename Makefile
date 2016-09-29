@@ -1,6 +1,6 @@
 all:
 	go get -d
-	go build -o ./vim-callstack
+	go build -o ./vim-stacktrace
 
 clean:
-	rm ./vim-callstack
+	rm ./vim-stacktrace

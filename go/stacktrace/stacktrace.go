@@ -1,4 +1,4 @@
-package callstack
+package stacktrace
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ type Err struct {
 	Error string `json:"error"`
 }
 
-type Callstack struct {
+type Stacktrace struct {
 	Entries []*Entry `json:"entries"`
 }
 
@@ -77,7 +77,7 @@ func (cli *Vim) callstrfunc(f string, args ...interface{}) (string, error) {
 	return "", fmt.Errorf("%v(%v) is not string: %v", f, args, ret)
 }
 
-func (cli *Vim) Callstack() (*Callstack, error) {
+func (cli *Vim) Callstack() (*Stacktrace, error) {
 	sfile, err := cli.sfile()
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (cli *Vim) Callstack() (*Callstack, error) {
 }
 
 // throwpoint should be normalized
-func (cli *Vim) build(throwpoint string) (*Callstack, error) {
+func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	if !strings.HasPrefix(throwpoint, "function ") {
 		return nil, fmt.Errorf("doesn't called in function")
 	}
@@ -112,10 +112,10 @@ func (cli *Vim) build(throwpoint string) (*Callstack, error) {
 		}
 		es = append(es, e)
 	}
-	return &Callstack{Entries: es}, nil
+	return &Stacktrace{Entries: es}, nil
 }
 
-func (cli *Vim) Build(throwpoint string) (*Callstack, error) {
+func (cli *Vim) Build(throwpoint string) (*Stacktrace, error) {
 	return cli.build(normalizeThrowpoint(throwpoint))
 }
 

@@ -1,4 +1,4 @@
-package callstack
+package stacktrace
 
 import (
 	"io/ioutil"
@@ -46,11 +46,11 @@ func TestVim_Build(t *testing.T) {
 	v := &Vim{c: cli}
 	tests := []struct {
 		in   string
-		want *Callstack
+		want *Stacktrace
 	}{
 		{
 			in: "function <SNR>13_test3, line 2",
-			want: &Callstack{
+			want: &Stacktrace{
 				Entries: []*Entry{
 					{
 						Funcname: "<SNR>13_test3",
@@ -62,7 +62,7 @@ func TestVim_Build(t *testing.T) {
 		},
 		{
 			in: "function F[5]..<lambda>3[1]..<SNR>13_test3, line 2",
-			want: &Callstack{
+			want: &Stacktrace{
 				Entries: []*Entry{
 					{
 						Funcname: "F",
@@ -84,7 +84,7 @@ func TestVim_Build(t *testing.T) {
 		},
 		{
 			in: "function 14[14]",
-			want: &Callstack{
+			want: &Stacktrace{
 				Entries: []*Entry{
 					{
 						Funcname: "{14}",
@@ -130,7 +130,7 @@ function! s:test2() abort
   return printf('%s[%s]', expand('<sfile>'), expand('<slnum>'))
 endfunction
 `
-	tmp, err := ioutil.TempFile("", "vim-callstack-test")
+	tmp, err := ioutil.TempFile("", "vim-stacktrace-test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +139,7 @@ endfunction
 	tmp.WriteString(scripts)
 	filename := tmp.Name()
 
-	want := &Callstack{
+	want := &Stacktrace{
 		Entries: []*Entry{
 			&Entry{
 				Funcname: "F",

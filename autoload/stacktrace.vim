@@ -1,5 +1,5 @@
 "=============================================================================
-" FILE: autoload/callstack.vim
+" FILE: autoload/stacktrace.vim
 " AUTHOR: haya14busa
 " License: MIT license
 "=============================================================================
@@ -7,18 +7,18 @@ scriptencoding utf-8
 let s:save_cpo = &cpo
 set cpo&vim
 
-let g:callstack#debug = v:false
+let g:stacktrace#debug = v:false
 
-function! callstack#get() abort
-  return ch_evalexpr(s:job_start(), {'id': 'callstack#get'})
+function! stacktrace#callstack() abort
+  return ch_evalexpr(s:job_start(), {'id': 'stacktrace#callstack'})
 endfunction
 
-function! callstack#build(throwpoint) abort
-  return ch_evalexpr(s:job_start(), {'id': 'callstack#build', 'throwpoint': a:throwpoint})
+function! stacktrace#build(throwpoint) abort
+  return ch_evalexpr(s:job_start(), {'id': 'stacktrace#build', 'throwpoint': a:throwpoint})
 endfunction
 
 function! s:err_cb(ch, msg) abort
-  echom 'vim-callstack:' . a:msg
+  echom 'vim-stacktrace:' . a:msg
 endfunction
 
 function! s:separator() abort
@@ -31,7 +31,7 @@ let s:base = expand('<sfile>:p:h:h')
 let s:basecmd = s:base . s:separator() . fnamemodify(s:base, ':t')
 let s:cmd = s:basecmd . (s:is_windows ? '.exe' : '')
 
-if g:callstack#debug
+if g:stacktrace#debug
   let s:cmd = ['go', 'run', s:basecmd . '.go']
 elseif !filereadable(s:cmd)
   call system(printf("cd %s && go get -d && go build", s:base))

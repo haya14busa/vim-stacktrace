@@ -1,4 +1,4 @@
-package callstack
+package stacktrace
 
 import (
 	"log"
@@ -30,14 +30,14 @@ func (h *myHandler) Serve(cli *vim.Client, msg *vim.Message) {
 
 		if s, ok := id.(string); ok {
 			switch s {
-			case "callstack#get":
+			case "stacktrace#callstack":
 				r, err := v.Callstack()
 				if err != nil {
 					ret = &Err{Error: err.Error()}
 				}
 				ret = r
 
-			case "callstack#build":
+			case "stacktrace#build":
 				t, ok := body["throwpoint"]
 				if !ok {
 					ret = &Err{Error: "throwpoint is required"}

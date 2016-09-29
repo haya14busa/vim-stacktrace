@@ -15,7 +15,7 @@ function! F() abort
 endfunction
 
 function! s:test3() abort
-  return callstack#get()
+  return stacktrace#callstack()
 endfunction
 
 if expand('%:p') ==# expand('<sfile>:p') || expand('%:p') ==# ''
