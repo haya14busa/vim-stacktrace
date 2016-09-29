@@ -33,6 +33,7 @@ func TestVimHandle(t *testing.T) {
 		in vim.Body
 	}{
 		{map[string]interface{}{"id": "stacktrace#build", "throwpoint": "function F[1]"}},
+		{map[string]interface{}{"id": "stacktrace#histerrs", "msghist": ""}},
 	}
 	for _, tt := range tests {
 		if _, err := v.handle(tt.in); err != nil {
@@ -53,6 +54,8 @@ func TestVimHandle_error(t *testing.T) {
 		{map[string]interface{}{"id": "stacktrace#callstack"}}, // <sfile> is empty
 		{map[string]interface{}{"id": "stacktrace#build"}},
 		{map[string]interface{}{"id": "stacktrace#build", "throwpoint": 1}},
+		{map[string]interface{}{"id": "stacktrace#histerrs"}},
+		{map[string]interface{}{"id": "stacktrace#histerrs", "msghist": 1}},
 	}
 	for _, tt := range tests {
 		got, err := v.handle(tt.in)

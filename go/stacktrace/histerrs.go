@@ -13,13 +13,13 @@ type Error struct {
 	// e.g.
 	//   function F[5]..<lambda>3[1]..<SNR>13_test3[2]
 	//   /path/to/file.vim[14]
-	Throwpoint string
+	Throwpoint string `json:"throwpoint"`
 
 	// Vim script error message
 	// e.g.
 	//   E121: Undefined variable: err1
 	//   E15: Invalid expression: err1
-	Messages []string
+	Messages []string `json:"messages"`
 }
 
 const detectedLinePrefix = "Error detected while processing "

@@ -17,6 +17,14 @@ function! stacktrace#build(throwpoint) abort
   return ch_evalexpr(s:job_start(), {'id': 'stacktrace#build', 'throwpoint': a:throwpoint})
 endfunction
 
+function! stacktrace#histerrs(...) abort
+  let msghist = get(a:, 1, '')
+  if msghist ==# ''
+    let msghist = execute(':message')
+  endif
+  return ch_evalexpr(s:job_start(), {'id': 'stacktrace#histerrs', 'msghist': msghist})
+endfunction
+
 function! s:err_cb(ch, msg) abort
   echom 'vim-stacktrace:' . a:msg
 endfunction

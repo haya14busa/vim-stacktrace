@@ -52,6 +52,14 @@ func (cli *Vim) handle(msgBody vim.Body) (interface{}, error) {
 				return nil, fmt.Errorf("throwpoint is not string: %+v", t)
 			}
 			return cli.Build(t.(string))
+		case "stacktrace#histerrs":
+			t, ok := body["msghist"]
+			if !ok {
+				return nil, fmt.Errorf("msghist is required in message body: %v", body)
+			} else if _, ok := t.(string); !ok {
+				return nil, fmt.Errorf("msghist is not string: %+v", t)
+			}
+			return Histerrs(t.(string))
 		default:
 			return nil, fmt.Errorf("got an unexpected id: %v", s)
 		}
