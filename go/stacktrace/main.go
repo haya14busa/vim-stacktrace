@@ -59,7 +59,9 @@ func (cli *Vim) handle(msgBody vim.Body) (interface{}, error) {
 			} else if _, ok := t.(string); !ok {
 				return nil, fmt.Errorf("msghist is not string: %+v", t)
 			}
-			return Histerrs(t.(string))
+			return Histerrs(t.(string)), nil
+		case "stacktrace#fromhist":
+			return cli.Fromhist()
 		default:
 			return nil, fmt.Errorf("got an unexpected id: %v", s)
 		}

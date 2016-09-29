@@ -50,7 +50,7 @@ const (
 //   Error detected while processing /path/to/file.vim:
 //   line   33:
 //   E605: Exception not caught: 0
-func Histerrs(msghist string) ([]*Error, error) {
+func Histerrs(msghist string) []*Error {
 	var errors []*Error
 	e := &Error{}
 	state := histDefault
@@ -124,5 +124,50 @@ func Histerrs(msghist string) ([]*Error, error) {
 			}
 		}
 	}
-	return errors, nil
+	return errors
+}
+
+var inputlist = func(cli *Vim, candidates []string) (int, error) {
+	return cli.callintfunc("inputlist", candidates)
+}
+
+// Fromhist returns selected stacktrace from errors in message history.
+func (cli *Vim) Fromhist() (*Stacktrace, error) {
+	msghist, err := cli.callstrfunc("execute", ":message")
+	if err != nil {
+		return nil, err
+	}
+	selected, err := cli.selectError(msghist)
+	if err != nil || selected == nil {
+		return nil, err
+	}
+	return cli.Build(selected.Throwpoint)
+}
+
+// selectError selectes error from msg, it may return nil.
+func (cli *Vim) selectError(msghist string) (*Error, error) {
+	histerrs := Histerrs(msghist)
+
+	if len(histerrs) == 0 {
+		return nil, nil
+	} else if len(histerrs) == 1 {
+		return histerrs[0], nil
+	}
+
+	candidates := make([]string, 0, len(histerrs))
+	for i, histerr := range histerrs {
+		s := fmt.Sprintf("%d. %v: %v", i+1, histerr.Throwpoint, strings.Join(histerr.Messages, ", "))
+		candidates = append(candidates, s)
+	}
+
+	j, err := inputlist(cli, candidates)
+	if err != nil {
+		return nil, err
+	}
+	if j == 0 { // canceled
+		return nil, nil
+	} else if j < 0 || len(candidates) < j {
+		return nil, fmt.Errorf("selected invalid number: %v", j)
+	}
+	return histerrs[j-1], nil
 }

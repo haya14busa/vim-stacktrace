@@ -90,6 +90,18 @@ func (cli *Vim) callstrfunc(f string, args ...interface{}) (string, error) {
 	return "", fmt.Errorf("%v(%v) is not string: %v", f, args, ret)
 }
 
+func (cli *Vim) callintfunc(f string, args ...interface{}) (int, error) {
+	ret, err := cli.c.Call(f, args...)
+	if err != nil {
+		return 0, err
+	}
+	s, ok := ret.(float64)
+	if ok {
+		return int(s), nil
+	}
+	return 0, fmt.Errorf("%v(%v) is not float64: %v", f, args, ret)
+}
+
 // Callstack returns current callstack.
 //
 // vimdoc:func:

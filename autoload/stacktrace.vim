@@ -25,6 +25,10 @@ function! stacktrace#histerrs(...) abort
   return ch_evalexpr(s:job_start(), {'id': 'stacktrace#histerrs', 'msghist': msghist})
 endfunction
 
+function! stacktrace#fromhist() abort
+  return ch_evalexpr(s:job_start(), {'id': 'stacktrace#fromhist'})
+endfunction
+
 function! s:err_cb(ch, msg) abort
   echom 'vim-stacktrace:' . a:msg
 endfunction

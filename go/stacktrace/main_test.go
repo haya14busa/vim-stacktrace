@@ -34,6 +34,7 @@ func TestVimHandle(t *testing.T) {
 	}{
 		{map[string]interface{}{"id": "stacktrace#build", "throwpoint": "function F[1]"}},
 		{map[string]interface{}{"id": "stacktrace#histerrs", "msghist": ""}},
+		{map[string]interface{}{"id": "stacktrace#fromhist"}},
 	}
 	for _, tt := range tests {
 		if _, err := v.handle(tt.in); err != nil {
