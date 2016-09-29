@@ -5,7 +5,6 @@ import "testing"
 
 func TestHisterrs(t *testing.T) {
 	tests := []struct {
-		name string
 		in   string
 		want []*Error
 	}{
