@@ -11,25 +11,6 @@ import (
 	vim "github.com/haya14busa/vim-go-client"
 )
 
-var cli *vim.Client
-
-var vimArgs = []string{"-Nu", "NONE", "-i", "NONE", "-n"}
-
-type testHandler struct{}
-
-func (h *testHandler) Serve(cli *vim.Client, msg *vim.Message) {}
-
-func TestMain(m *testing.M) {
-	c, closer, err := vim.NewChildClient(&testHandler{}, vimArgs)
-	if err != nil {
-		log.Fatal(err)
-	}
-	cli = c
-	code := m.Run()
-	closer.Close()
-	os.Exit(code)
-}
-
 func TestVim_Build(t *testing.T) {
 	v := &Vim{c: cli}
 	tests := []struct {
