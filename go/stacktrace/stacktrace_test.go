@@ -107,6 +107,17 @@ func TestVim_Build(t *testing.T) {
 				},
 			},
 		},
+		{ // file
+			in: "/path/to/file.vim, line 14",
+			want: &Stacktrace{
+				Entries: []*Entry{
+					{
+						Filename: "/path/to/file.vim",
+						Lnum:     14,
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		got, err := v.Build(tt.in)
@@ -214,6 +225,41 @@ endfunction
 			}
 		}
 	}
+}
+
+func TestVim_buildFileEntry(t *testing.T) {
+	v := &Vim{c: cli}
+	scripts := `line1
+line2
+line3
+   line4
+`
+	tmp, err := ioutil.TempFile("", "vim-stacktrace-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tmp.Close()
+	defer os.Remove(tmp.Name())
+	tmp.WriteString(scripts)
+	filename := tmp.Name()
+
+	tests := []struct {
+		lnum int
+		want *Entry
+	}{
+		{lnum: 1, want: &Entry{Lnum: 1, Line: "line1", Text: "line1", Filename: filename}},
+		{lnum: 4, want: &Entry{Lnum: 4, Line: "   line4", Text: "   line4", Filename: filename}},
+	}
+	for _, tt := range tests {
+		got, err := v.buildFileEntry(filename, tt.lnum)
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("Vim.buildFileEntry(%v) = %#+v, want %#+v", tt.lnum, got, tt.want)
+		}
+	}
+
 }
 
 func TestSeparateEntry(t *testing.T) {

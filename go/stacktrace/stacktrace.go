@@ -1,6 +1,7 @@
 package stacktrace
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"regexp"
@@ -87,10 +88,20 @@ func (cli *Vim) Callstack() (*Stacktrace, error) {
 	return cli.build(throwpoint)
 }
 
+var fileThrowpointRegex = regexp.MustCompile(`\[\d+]$`)
+
 // throwpoint should be normalized
 func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	if !strings.HasPrefix(throwpoint, "function ") {
-		return nil, fmt.Errorf("doesn't called in function")
+		if fileThrowpointRegex.MatchString(throwpoint) {
+			fname, lnum := separateEntry(throwpoint)
+			e, err := cli.buildFileEntry(fname, lnum)
+			if err != nil {
+				return nil, err
+			}
+			return &Stacktrace{Entries: []*Entry{e}}, nil
+		}
+		return nil, fmt.Errorf("invalid throwpoint")
 	}
 
 	fileFuncLinesMu.Lock()
@@ -101,7 +112,7 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	ss := strings.Split(throwpoint[len("function "):], "..")
 	for _, e := range ss {
 		funcname, flnum := separateEntry(e)
-		e, err := cli.buildEntry(funcname, flnum)
+		e, err := cli.buildFuncEntry(funcname, flnum)
 		if err != nil {
 			return nil, err
 		}
@@ -159,8 +170,32 @@ func normalizeThrowpoint(throwpoint string) string {
 
 var allNumRegex = regexp.MustCompile(`^\d+$`)
 
-// e: {funcname}[{line}]
-func (cli *Vim) buildEntry(funcname string, flnum int) (*Entry, error) {
+func (cli *Vim) buildFileEntry(filename string, lnum int) (*Entry, error) {
+	e := &Entry{
+		Filename: filename,
+		Lnum:     lnum,
+	}
+	f, err := os.Open(filename)
+	if err != nil {
+		return e, nil
+	}
+	defer f.Close()
+
+	s := bufio.NewScanner(f)
+	i := 0
+	for s.Scan() {
+		i++
+		if i == lnum {
+			e.Line = s.Text()
+			e.Text = s.Text()
+			break
+		}
+	}
+
+	return e, nil
+}
+
+func (cli *Vim) buildFuncEntry(funcname string, flnum int) (*Entry, error) {
 	// convert funcname for dict func
 	if allNumRegex.MatchString(funcname) {
 		funcname = fmt.Sprintf("{%v}", funcname)
