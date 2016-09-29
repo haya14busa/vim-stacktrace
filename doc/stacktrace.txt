@@ -78,6 +78,23 @@ Stack *stacktrace-type-stack*
 	  Text string `json:"text,omitempty"`
   }
 <
+Error *stacktrace-type-error*
+>
+  type Error struct {
+	  // Throwpint similar to v:throwpint. You can build stacktrace from this using
+	  // Vim.Build()
+	  // e.g.
+	  //   function F[5]..<lambda>3[1]..<SNR>13_test3[2]
+	  //   /path/to/file.vim[14]
+	  Throwpoint string `json:"throwpoint"`
+
+	  // Vim script error message
+	  // e.g.
+	  //   E121: Undefined variable: err1
+	  //   E15: Invalid expression: err1
+	  Messages []string `json:"messages"`
+  }
+<
 ------------------------------------------------------------------------------
 FUNCTIONS				*stacktrace-functions*
 
@@ -91,6 +108,14 @@ stacktrace#build({throwpoint})	*stacktrace#build()*
 		- function <SNR>13_test[1]..<SNR>13_test3, line 2
 		- function <SNR>13_test[1]..<SNR>13_test3[2]
 		- /path/to/file[2]
+
+stacktrace#histerrs([{string}])	*stacktrace#histerrs()*
+	Parses message history and returns list of error |stacktrace-type-error|.
+	|:message| content is used by default.
+
+stacktrace#fromhist()	*stacktrace#fromhist()*
+	Show error candidates from |message-history| and returns stacktrace of
+	selected error |stacktrace-type-stacktrace|.
 
 ==============================================================================
 CHANGELOG				 *stacktrace-changelog*

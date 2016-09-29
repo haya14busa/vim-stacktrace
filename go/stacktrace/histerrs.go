@@ -7,6 +7,8 @@ import (
 )
 
 // Error represents Vim script error
+// vimdoc:type:
+//	Error *stacktrace-type-error*
 type Error struct {
 	// Throwpint similar to v:throwpint. You can build stacktrace from this using
 	// Vim.Build()
@@ -50,6 +52,11 @@ const (
 //   Error detected while processing /path/to/file.vim:
 //   line   33:
 //   E605: Exception not caught: 0
+//
+// vimdoc:func:
+//	stacktrace#histerrs([{string}])	*stacktrace#histerrs()*
+//		Parses message history and returns list of error |stacktrace-type-error|.
+//		|:message| content is used by default.
 func Histerrs(msghist string) []*Error {
 	var errors []*Error
 	e := &Error{}
@@ -132,6 +139,11 @@ var inputlist = func(cli *Vim, candidates []string) (int, error) {
 }
 
 // Fromhist returns selected stacktrace from errors in message history.
+//
+// vimdoc:func:
+//	stacktrace#fromhist()	*stacktrace#fromhist()*
+//		Show error candidates from |message-history| and returns stacktrace of
+//		selected error |stacktrace-type-stacktrace|.
 func (cli *Vim) Fromhist() (*Stacktrace, error) {
 	msghist, err := cli.callstrfunc("execute", ":message")
 	if err != nil {
