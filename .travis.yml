@@ -6,8 +6,8 @@ go:
 
 os:
   - linux
-  - osx
-osx_image: xcode8
+#   - osx
+# osx_image: xcode8
 
 install:
   - make deps
