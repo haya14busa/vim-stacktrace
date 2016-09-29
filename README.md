@@ -6,12 +6,23 @@
 [![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![GoDoc](https://godoc.org/github.com/haya14busa/vim-stacktrace/go/stacktrace?status.svg)](https://godoc.org/github.com/haya14busa/vim-stacktrace/go/stacktrace)
 
-![anim.gif (1195×823)](https://raw.githubusercontent.com/haya14busa/i/b1065499c18fb0001198bdb911151cb47fa1759a/vim-stacktrace/anim.gif)
-
 vim-stacktrace provides a way to get a callstack or build stacktrace by error information (e.g. `v:throwpoint`, error message).
 You can create quickfix list or location list from the result.
 
 vim-stacktrace helps you to debug Vim script :bug: and to report a helpful error report to issue tracker of Vim plugins :two_hearts:
+
+#### :mag: :bug: Demo :CStacktraceFromhist
+
+`:CStacktraceFromhist` sets selected error stacktrace to quickfix list from message history.
+
+![stacktracefromhist.gif (1287×800)](https://raw.githubusercontent.com/haya14busa/i/e7ef65e590e850ea37425c6ebf4479c1422ef8c8/vim-stacktrace/stacktracefromhist.gif)
+
+#### :paw_prints: Demo stacktrace#callstack()
+
+`stacktrace#callstack()` returns current callstack.
+
+![anim.gif (1195×823)](https://raw.githubusercontent.com/haya14busa/i/b1065499c18fb0001198bdb911151cb47fa1759a/vim-stacktrace/anim.gif)
+
 
 ### Requirements
 - Vim 8.0 or above

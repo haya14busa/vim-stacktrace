@@ -66,30 +66,6 @@ type Vim struct {
 	c *vim.Client
 }
 
-// func (cli *Vim) debug(msg interface{}) {
-// 	cli.c.Ex("echom " + strconv.Quote(fmt.Sprintf("%+#v", msg)))
-// }
-
-func (cli *Vim) sfile() (string, error) {
-	return cli.callstrfunc("expand", "<sfile>")
-}
-
-func (cli *Vim) function(funcname string) (string, error) {
-	return cli.callstrfunc("execute", fmt.Sprintf(":verbose function %v", funcname))
-}
-
-func (cli *Vim) callstrfunc(f string, args ...interface{}) (string, error) {
-	ret, err := cli.c.Call(f, args...)
-	if err != nil {
-		return "", err
-	}
-	s, ok := ret.(string)
-	if ok {
-		return s, nil
-	}
-	return "", fmt.Errorf("%v(%v) is not string: %v", f, args, ret)
-}
-
 // Callstack returns current callstack.
 //
 // vimdoc:func:
@@ -182,8 +158,8 @@ func normalizeThrowpoint(throwpoint string) string {
 		return fmt.Sprintf("%s[%s]", throwpoint[:i], lnum)
 	}
 
-	if strings.HasPrefix(throwpoint, "Error detected while processing ") {
-		throwpoint = throwpoint[len("Error detected while processing "):]
+	if strings.HasPrefix(throwpoint, detectedLinePrefix) {
+		throwpoint = throwpoint[len(detectedLinePrefix):]
 	}
 
 	j := strings.Index(throwpoint, ":\nline")
