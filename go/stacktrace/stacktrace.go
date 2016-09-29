@@ -66,16 +66,12 @@ type Vim struct {
 	c *vim.Client
 }
 
-func (cli *Vim) debug(msg interface{}) {
-	cli.c.Ex("echom " + strconv.Quote(fmt.Sprintf("%+#v", msg)))
-}
+// func (cli *Vim) debug(msg interface{}) {
+// 	cli.c.Ex("echom " + strconv.Quote(fmt.Sprintf("%+#v", msg)))
+// }
 
 func (cli *Vim) sfile() (string, error) {
 	return cli.callstrfunc("expand", "<sfile>")
-}
-
-func (cli *Vim) slnum() (string, error) {
-	return cli.callstrfunc("expand", "<slnum>")
 }
 
 func (cli *Vim) function(funcname string) (string, error) {
