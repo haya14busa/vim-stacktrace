@@ -18,10 +18,14 @@ function! s:test3() abort
   return stacktrace#callstack()
 endfunction
 
-if expand('%:p') ==# expand('<sfile>:p') || expand('%:p') ==# ''
+function! Main() abort
   call ch_logfile('/tmp/vimchlog.txt', 'w')
   echom string(s:test())
   call setqflist(s:test().stacks)
   copen
   cfirst
+endfunction
+
+if expand('%:p') ==# expand('<sfile>:p') || expand('%:p') ==# ''
+  call Main()
 endif

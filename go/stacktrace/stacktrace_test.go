@@ -6,32 +6,18 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
-	"time"
 
 	vim "github.com/haya14busa/vim-go-client"
 )
 
 var cli *vim.Client
 
-var defaultServeFunc = func(cli *vim.Client, msg *vim.Message) {}
-
 var vimArgs = []string{"-Nu", "NONE", "-i", "NONE", "-n"}
 
-var waitLog = func() { time.Sleep(1 * time.Millisecond) }
+type testHandler struct{}
 
-type testHandler struct {
-	f func(cli *vim.Client, msg *vim.Message)
-}
-
-func (h *testHandler) Serve(cli *vim.Client, msg *vim.Message) {
-	fn := h.f
-	if fn == nil {
-		fn = defaultServeFunc
-	}
-	fn(cli, msg)
-}
+func (h *testHandler) Serve(cli *vim.Client, msg *vim.Message) {}
 
 func TestMain(m *testing.M) {
 	c, closer, err := vim.NewChildClient(&testHandler{}, vimArgs)
@@ -168,12 +154,21 @@ endfunction
 	defer os.Remove(tmp.Name())
 	tmp.WriteString(scripts)
 	filename := tmp.Name()
+
+	cli, closer, err := vim.NewChildClient(&testHandler{}, vimArgs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer closer.Close()
 	v := &Vim{c: cli}
 	v.c.Ex(":source " + filename)
 	throwpoint, _ := v.c.Expr("g:F()")
 	stacktrace, _ := v.Build(throwpoint.(string))
-	for _, s := range stacktrace.Stacks {
-		fmt.Println(strings.Replace(s.String(), filename, "/path/to/file.vim", 1))
+	for _, stack := range stacktrace.Stacks {
+		if stack.Filename != "" {
+			stack.Filename = "/path/to/file.vim"
+		}
+		fmt.Println(stack)
 	}
 	// Output:
 	// /path/to/file.vim:4: F:2:  return l:G()
