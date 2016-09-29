@@ -17,7 +17,8 @@ func TestExample(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer closer.Close()
-	cli.Ex(":source ./_example/example.vim")
+	// use execute() instead of cli.Ex to wait execution
+	cli.Call("execute", ":source ./_example/example.vim")
 	cli.Expr("Main()")
 	got, err := cli.Expr("getqflist()")
 	if err != nil {
