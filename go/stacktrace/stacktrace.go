@@ -19,10 +19,12 @@ var (
 	fileFuncLinesMu sync.RWMutex
 )
 
+// Err represents error from stacktrace.go.
 type Err struct {
 	Error string `json:"error"`
 }
 
+// Stacktrace represents stacktrace.
 type Stacktrace struct {
 	Stacks []*Stack `json:"stacks"`
 }
@@ -49,6 +51,7 @@ type Stack struct {
 	Text string `json:"text,omitempty"`
 }
 
+// Vim is vim client wrapper for stacktrace pkg.
 type Vim struct {
 	c *vim.Client
 }
@@ -81,6 +84,8 @@ func (cli *Vim) callstrfunc(f string, args ...interface{}) (string, error) {
 	return "", fmt.Errorf("%v(%v) is not string: %v", f, args, ret)
 }
 
+// Callstack returns current callstack.
+// vim:autoload: stacktrace#callstack()
 func (cli *Vim) Callstack() (*Stacktrace, error) {
 	sfile, err := cli.sfile()
 	if err != nil {
@@ -138,6 +143,18 @@ func separateStack(e string) (string, int) {
 	return body, line
 }
 
+// Build builds rich stacktrace from given throwpoint.
+// e.g.
+//  - function <SNR>13_test[1]..<SNR>13_test3, line 2
+//  - function <SNR>13_test[1]..<SNR>13_test3[2]
+//  - /path/to/file[2]
+// Example usage:
+//   :try
+//     throw 'error!'
+//   :catch
+//   :  echo stacktrace#build(v:throwpoint)
+//   :endtry
+// vim:autoload: stacktrace#build(throwpoint)
 func (cli *Vim) Build(throwpoint string) (*Stacktrace, error) {
 	return cli.build(normalizeThrowpoint(throwpoint))
 }

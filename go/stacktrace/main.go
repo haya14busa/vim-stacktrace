@@ -60,6 +60,7 @@ func (h *myHandler) Serve(cli *vim.Client, msg *vim.Message) {
 	}
 }
 
+// Main func.
 func Main() {
 	usr, _ := user.Current()
 	homedir = usr.HomeDir
