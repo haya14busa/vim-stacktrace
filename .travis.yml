@@ -1,0 +1,23 @@
+language: go
+
+go:
+  - 1.7
+  - tip
+
+install:
+  - go get -d -v -t ./...
+  - go get github.com/mattn/goveralls
+  - go get github.com/golang/lint/golint
+  - go get honnef.co/go/unused/cmd/unused
+
+before_script:
+  - vim --cmd version --cmd quit
+
+script:
+  # - go test -v -race ./...
+  - goveralls -service=travis-ci
+  - go vet ./...
+  - golint -set_exit_status ./...
+  - unused ./...
+  - (! gofmt -s -d -l . 2>&1 | grep '^')
+  - (! goimports -l . 2>&1 | grep '^')
