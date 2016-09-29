@@ -101,10 +101,11 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	ss := strings.Split(throwpoint[len("function "):], "..")
 	for _, e := range ss {
 		i := strings.Index(e, "[")
-		funcname := e[:i]
-		flnum, err := strconv.Atoi(e[i+1 : len(e)-1])
-		if err != nil {
-			return nil, err
+		funcname := e
+		flnum := 0
+		if i != -1 {
+			funcname = e[:i]
+			flnum, _ = strconv.Atoi(e[i+1 : len(e)-1])
 		}
 		e, err := cli.buildEntry(funcname, flnum)
 		if err != nil {

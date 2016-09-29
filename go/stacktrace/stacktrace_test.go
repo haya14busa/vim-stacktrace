@@ -94,6 +94,19 @@ func TestVim_Build(t *testing.T) {
 				},
 			},
 		},
+		{
+			// support malformed style which doesn't have line number
+			in: "function <SNR>13_test3",
+			want: &Stacktrace{
+				Entries: []*Entry{
+					{
+						Funcname: "<SNR>13_test3",
+						Flnum:    0,
+						Text:     "<SNR>13_test3:0:",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		got, err := v.Build(tt.in)
