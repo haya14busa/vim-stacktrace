@@ -89,6 +89,7 @@ E121: errormsg
 			},
 		},
 	}
+	v := &Vim{c: cli}
 	for _, tt := range tests {
 		got, err := Histerrs(tt.in)
 		if err != nil {
@@ -103,6 +104,16 @@ E121: errormsg
 			t.Log("want:")
 			for _, e := range tt.want {
 				t.Logf("%#v", e)
+			}
+		}
+		// check all throwpints are valid
+		for _, e := range got {
+			ss, err := v.Build(e.Throwpoint)
+			if err != nil {
+				t.Errorf("Error.Throwpoint (%v) is invalid: %v", e.Throwpoint, err)
+			}
+			if len(ss.Stacks) == 0 {
+				t.Errorf("Error.Throwpoint is empty: Error: %v", e)
 			}
 		}
 	}
