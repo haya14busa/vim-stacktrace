@@ -34,7 +34,7 @@ let s:cmd = s:basecmd . (s:is_windows ? '.exe' : '')
 if g:stacktrace#debug
   let s:cmd = ['go', 'run', s:basecmd . '.go']
 elseif !filereadable(s:cmd)
-  call system(printf("cd %s && go get -d && go build", s:base))
+  call system(printf('cd %s && go get -d && go build', s:base))
 endif
 
 let s:option = {
@@ -45,7 +45,7 @@ let s:option = {
 
 function! s:job_start() abort
   if exists('s:job')
-    if ch_status(s:job) ==# "closed"
+    if ch_status(s:job) ==# 'closed'
       call job_stop(s:job)
       let s:job = job_start(s:cmd, s:option)
     endif
