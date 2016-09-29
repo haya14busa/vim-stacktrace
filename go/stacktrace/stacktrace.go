@@ -25,12 +25,18 @@ type Err struct {
 }
 
 // Stacktrace represents stacktrace.
+//
+// vimdoc:type:
+//	Stacktrace *stacktrace-type-stacktrace*
 type Stacktrace struct {
 	Stacks []*Stack `json:"stacks"`
 }
 
 // Stack represents a stack of stacktrace.
 // The field names are compatible with quickfix and location list. :h setqflist()
+//
+// vimdoc:type:
+//	Stack *stacktrace-type-stack*
 type Stack struct {
 	// Function name including <SNR> for script local function
 	Funcname string `json:"funcname,omitempty"`
@@ -89,7 +95,10 @@ func (cli *Vim) callstrfunc(f string, args ...interface{}) (string, error) {
 }
 
 // Callstack returns current callstack.
-// vim:autoload: stacktrace#callstack()
+//
+// vimdoc:func:
+//	stacktrace#callstack()	*stacktrace#callstack()*
+//		Returns current callstack |stacktrace-type-stacktrace|.
 func (cli *Vim) Callstack() (*Stacktrace, error) {
 	sfile, err := cli.sfile()
 	if err != nil {
@@ -148,17 +157,15 @@ func separateStack(e string) (string, int) {
 }
 
 // Build builds rich stacktrace from given throwpoint.
-// e.g.
-//  - function <SNR>13_test[1]..<SNR>13_test3, line 2
-//  - function <SNR>13_test[1]..<SNR>13_test3[2]
-//  - /path/to/file[2]
-// Example usage:
-//   :try
-//     throw 'error!'
-//   :catch
-//   :  echo stacktrace#build(v:throwpoint)
-//   :endtry
-// vim:autoload: stacktrace#build(throwpoint)
+//
+// vimdoc:func:
+//	stacktrace#build({throwpoint})	*stacktrace#build()*
+//		Return rich stacktrace |stacktrace-type-stacktrace| from given throwpoint
+//		similar to |v:throwpoint|.
+//		Example throwpoint:
+//			- function <SNR>13_test[1]..<SNR>13_test3, line 2
+//			- function <SNR>13_test[1]..<SNR>13_test3[2]
+//			- /path/to/file[2]
 func (cli *Vim) Build(throwpoint string) (*Stacktrace, error) {
 	return cli.build(normalizeThrowpoint(throwpoint))
 }
