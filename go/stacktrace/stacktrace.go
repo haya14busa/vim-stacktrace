@@ -182,8 +182,8 @@ func normalizeThrowpoint(throwpoint string) string {
 		return fmt.Sprintf("%s[%s]", throwpoint[:i], lnum)
 	}
 
-	if strings.HasPrefix(throwpoint, "Error detected while processing ") {
-		throwpoint = throwpoint[len("Error detected while processing "):]
+	if strings.HasPrefix(throwpoint, detectedLinePrefix) {
+		throwpoint = throwpoint[len(detectedLinePrefix):]
 	}
 
 	j := strings.Index(throwpoint, ":\nline")
