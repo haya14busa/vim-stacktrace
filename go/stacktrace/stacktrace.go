@@ -121,8 +121,14 @@ func (cli *Vim) Build(throwpoint string) (*Stacktrace, error) {
 }
 
 // function <SNR>13_test[1]..<SNR>13_test2[1]..F[3]..<lambda>1[1]..<SNR>13_test3, line 2
+// -> function <SNR>13_test[1]..<SNR>13_test3[2]
+//
 // Error detected while processing function <SNR>13_test[1]..<SNR>13_test3:
 // line    2:
+// -> function <SNR>13_test[1]..<SNR>13_test3[2]
+//
+// /path/to/file.vim, line 23
+// -> /path/to/file.vim[23]
 func normalizeThrowpoint(throwpoint string) string {
 	i := strings.Index(throwpoint, ", line ")
 	if i != -1 {

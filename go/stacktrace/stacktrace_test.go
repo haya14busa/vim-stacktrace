@@ -217,28 +217,32 @@ endfunction
 }
 
 func TestNormalizeThrowpoint(t *testing.T) {
-	want := "function <SNR>13_test[1]..<SNR>13_test3[2]"
 
-	{ // v:throwpoint
-		in := "function <SNR>13_test[1]..<SNR>13_test3, line 2"
-		got := normalizeThrowpoint(in)
-		if got != want {
-			t.Errorf("normalizeThrowpoint(%v) = %v, want %v", in, got, want)
-		}
-		if got2 := normalizeThrowpoint(got); got2 != want {
-			t.Errorf("normalizeThrowpoint(%v) = %v, want %v", got, got2, want)
-		}
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{ // v:throwpoint
+			in:   "function <SNR>13_test[1]..<SNR>13_test3, line 2",
+			want: "function <SNR>13_test[1]..<SNR>13_test3[2]",
+		},
+		{ // :throw message
+			in:   "Error detected while processing function <SNR>13_test[1]..<SNR>13_test3:\nline    2:",
+			want: "function <SNR>13_test[1]..<SNR>13_test3[2]",
+		},
+		{ // v:throwpoint
+			in:   "/path/to/file.vim, line 23",
+			want: "/path/to/file.vim[23]",
+		},
 	}
 
-	{ // :throw message
-		in := "Error detected while processing function <SNR>13_test[1]..<SNR>13_test3:\nline    2:"
-		got := normalizeThrowpoint(in)
-		if got != want {
-			t.Errorf("normalizeThrowpoint(%v) = %v, want %v", in, got, want)
+	for _, tt := range tests {
+		got := normalizeThrowpoint(tt.in)
+		if got != tt.want {
+			t.Errorf("normalizeThrowpoint(%v) = %v, tt.want %v", tt.in, got, tt.want)
 		}
-		if got2 := normalizeThrowpoint(got); got2 != want {
-			t.Errorf("normalizeThrowpoint(%v) = %v, want %v", got, got2, want)
+		if got2 := normalizeThrowpoint(got); got2 != tt.want {
+			t.Errorf("normalizeThrowpoint(%v) = %v, tt.want %v", got, got2, tt.want)
 		}
 	}
-
 }
