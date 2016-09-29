@@ -37,6 +37,6 @@ func TestExample(t *testing.T) {
 	}
 	gotLnum := first["lnum"].(float64)
 	if gotLnum != wantLnum {
-		t.Error("got lnum:%v, want lnum:%v", gotLnum, wantLnum)
+		t.Errorf("got lnum:%v, want lnum:%v", gotLnum, wantLnum)
 	}
 }
