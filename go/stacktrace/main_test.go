@@ -62,3 +62,21 @@ func TestVimHandle_error(t *testing.T) {
 		t.Log(err)
 	}
 }
+
+func TestMyHandler_Serve(t *testing.T) {
+	tests := []struct {
+		in *vim.Message
+	}{
+		{&vim.Message{}},                  // no id
+		{&vim.Message{MsgID: 1, Body: 1}}, // invalid body
+		{&vim.Message{ // ok
+			MsgID: 1,
+			Body:  map[string]interface{}{"id": "stacktrace#build", "throwpoint": "function F[1]"},
+		}},
+	}
+	handler := &myHandler{}
+	for _, tt := range tests {
+		// Just checking it works without panic
+		handler.Serve(cli, tt.in)
+	}
+}
