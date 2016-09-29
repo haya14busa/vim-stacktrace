@@ -162,7 +162,7 @@ func (cli *Vim) Fromhist() (*Stacktrace, error) {
 		last := stacktrace.Stacks[len(stacktrace.Stacks)-1]
 		last.Text = strings.Join(selected.Messages, ", ") + " : " + last.Text
 	}
-	return stacktrace, err
+	return stacktrace, nil
 }
 
 // selectError selectes error from msg, it may return nil.

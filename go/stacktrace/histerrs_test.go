@@ -1,7 +1,13 @@
 package stacktrace
 
-import "reflect"
-import "testing"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+	"testing"
+
+	vim "github.com/haya14busa/vim-go-client"
+)
 
 func TestHisterrs(t *testing.T) {
 	tests := []struct {
@@ -116,6 +122,42 @@ E121: errormsg
 	}
 }
 
+func TestVimFromhist(t *testing.T) {
+	msghist := `
+Error detected while processing function Main[2]..<SNR>96_test[1]..<SNR>96_test2[1]..F:
+line    3:
+E121: Undefined variable: err1
+E15: Invalid expression: err1
+`
+	c, closer, err := vim.NewChildClient(&testHandler{}, vimArgs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closer.Close()
+	v := &Vim{c: c}
+	for _, line := range strings.Split(msghist, "\n") {
+		v.c.Ex(fmt.Sprintf("echomsg '%v'", line))
+	}
+	got, err := v.Fromhist()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got.Stacks) == 0 {
+		t.Error("Vim.Fromhist() = nil")
+	}
+}
+
+func TestVimFromhist_empty(t *testing.T) {
+	v := &Vim{c: cli}
+	got, err := v.Fromhist()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != nil {
+		t.Errorf("Vim.Fromhist() = %v, want nil", got)
+	}
+}
+
 func TestSelectError(t *testing.T) {
 	msghist := `
 Error detected while processing function Main[2]..<SNR>96_test[1]..<SNR>96_test2[1]..F:
@@ -172,17 +214,6 @@ E605: Exception not caught: 0
 		if got.Throwpoint != tt.wantThrowpoint {
 			t.Errorf("got %v, want %v", got.Throwpoint, tt.wantThrowpoint)
 		}
-	}
-}
-
-func TestVimFromhist(t *testing.T) {
-	v := &Vim{c: cli}
-	got, err := v.Fromhist()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got != nil {
-		t.Errorf("Vim.Fromhist() = %v, want nil", got)
 	}
 }
 
