@@ -153,7 +153,16 @@ func (cli *Vim) Fromhist() (*Stacktrace, error) {
 	if err != nil || selected == nil {
 		return nil, err
 	}
-	return cli.Build(selected.Throwpoint)
+	stacktrace, err := cli.Build(selected.Throwpoint)
+	if err != nil {
+		return nil, err
+	}
+	// Add error messages
+	if len(stacktrace.Stacks) > 0 {
+		last := stacktrace.Stacks[len(stacktrace.Stacks)-1]
+		last.Text = strings.Join(selected.Messages, ", ") + " : " + last.Text
+	}
+	return stacktrace, err
 }
 
 // selectError selectes error from msg, it may return nil.
