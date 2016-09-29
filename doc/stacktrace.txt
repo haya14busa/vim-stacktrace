@@ -31,6 +31,7 @@ CONTENTS				*stacktrace-contents*
 
 INTRODUCTION		|stacktrace-introduction|
 INTERFACE		|stacktrace-interface|
+  Commands			|stacktrace-commands|
   Types				|stacktrace-types|
   Functions			|stacktrace-functions|
 Changelog		|stacktrace-changelog|
@@ -43,6 +44,18 @@ script.
 
 ==============================================================================
 INTERFACE				*stacktrace-interface*
+
+------------------------------------------------------------------------------
+COMMANDS				*stacktrace-commands*
+
+:CStacktraceFromhist				*:CStacktraceFromhist*
+			Create the |quickfix| list from an error stacktrace
+			selected by |message-history|.
+
+:LStacktraceFromhist				*:LStacktraceFromhist*
+			Same as ":CStacktraceFromhist", except the
+			|location-list| for the current window is used instead
+			of the |quickfix| list.
 
 ------------------------------------------------------------------------------
 TYPES					*stacktrace-types*
