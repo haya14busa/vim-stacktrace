@@ -1,10 +1,12 @@
 package stacktrace
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -131,6 +133,54 @@ func TestVim_Build(t *testing.T) {
 			}
 		}
 	}
+}
+
+func ExampleVim_Build() {
+	scripts := `
+function! F() abort
+  let l:G = {-> s:test()}
+  return l:G()
+endfunction
+
+function! s:test() abort
+  return s:d.f()
+endfunction
+
+let s:d = {}
+function! s:d.f() abort
+  return s:test2()
+endfunction
+
+function! s:test2() abort
+  try
+    throw 'error!'
+  catch
+    return v:throwpoint
+    " You can use stacktrace#build in Vim script
+    " call stacktrace#build(v:throwpoint)
+  endtry
+  " If you just want the current callstack, use stacktrace#callstack()
+  " call stacktrace#callstack()
+endfunction
+`
+	tmp, _ := ioutil.TempFile("", "vim-stacktrace-test")
+	defer tmp.Close()
+	defer os.Remove(tmp.Name())
+	tmp.WriteString(scripts)
+	filename := tmp.Name()
+	v := &Vim{c: cli}
+	v.c.Ex(":source " + filename)
+	throwpoint, _ := v.c.Expr("g:F()")
+	stacktrace, _ := v.Build(throwpoint.(string))
+	for _, s := range stacktrace.Stacks {
+		fmt.Println(strings.Replace(s.String(), filename, "/path/to/file.vim", 1))
+	}
+	// Output:
+	// /path/to/file.vim:4: F:2:  return l:G()
+	// :0: <lambda>1:1:
+	// /path/to/file.vim:8: <SNR>2_test:1:  return s:d.f()
+	// /path/to/file.vim:0: {1}:1:  return s:test2()
+	// /path/to/file.vim:18: <SNR>2_test2:2:    throw 'error!'
 }
 
 func TestVim_Build_intergration(t *testing.T) {

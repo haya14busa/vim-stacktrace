@@ -51,6 +51,10 @@ type Stack struct {
 	Text string `json:"text,omitempty"`
 }
 
+func (s *Stack) String() string {
+	return fmt.Sprintf("%s:%d: %s", s.Filename, s.Lnum, s.Text)
+}
+
 // Vim is vim client wrapper for stacktrace pkg.
 type Vim struct {
 	c *vim.Client
