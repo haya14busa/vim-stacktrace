@@ -51,7 +51,7 @@ func TestVim_Build(t *testing.T) {
 		{
 			in: "function <SNR>13_test3, line 2",
 			want: &Stacktrace{
-				Entries: []*Entry{
+				Stacks: []*Stack{
 					{
 						Funcname: "<SNR>13_test3",
 						Flnum:    2,
@@ -63,7 +63,7 @@ func TestVim_Build(t *testing.T) {
 		{
 			in: "function F[5]..<lambda>3[1]..<SNR>13_test3, line 2",
 			want: &Stacktrace{
-				Entries: []*Entry{
+				Stacks: []*Stack{
 					{
 						Funcname: "F",
 						Flnum:    5,
@@ -85,7 +85,7 @@ func TestVim_Build(t *testing.T) {
 		{
 			in: "function 14[14]",
 			want: &Stacktrace{
-				Entries: []*Entry{
+				Stacks: []*Stack{
 					{
 						Funcname: "{14}",
 						Flnum:    14,
@@ -98,7 +98,7 @@ func TestVim_Build(t *testing.T) {
 			// support malformed style which doesn't have line number
 			in: "function <SNR>13_test3",
 			want: &Stacktrace{
-				Entries: []*Entry{
+				Stacks: []*Stack{
 					{
 						Funcname: "<SNR>13_test3",
 						Flnum:    0,
@@ -110,7 +110,7 @@ func TestVim_Build(t *testing.T) {
 		{ // file
 			in: "/path/to/file.vim, line 14",
 			want: &Stacktrace{
-				Entries: []*Entry{
+				Stacks: []*Stack{
 					{
 						Filename: "/path/to/file.vim",
 						Lnum:     14,
@@ -125,9 +125,9 @@ func TestVim_Build(t *testing.T) {
 			t.Error(err)
 		}
 		if !reflect.DeepEqual(got, tt.want) {
-			for i, e := range got.Entries {
+			for i, e := range got.Stacks {
 				t.Errorf("got :%#v", e)
-				t.Errorf("want:%#v", tt.want.Entries[i])
+				t.Errorf("want:%#v", tt.want.Stacks[i])
 			}
 		}
 	}
@@ -164,8 +164,8 @@ endfunction
 	filename := tmp.Name()
 
 	want := &Stacktrace{
-		Entries: []*Entry{
-			&Entry{
+		Stacks: []*Stack{
+			&Stack{
 				Funcname: "F",
 				Flnum:    2,
 				Line:     "  return l:G()",
@@ -173,7 +173,7 @@ endfunction
 				Lnum:     4,
 				Text:     "F:2:  return l:G()",
 			},
-			&Entry{
+			&Stack{
 				Funcname: "<lambda>1",
 				Flnum:    1,
 				Line:     "",
@@ -181,7 +181,7 @@ endfunction
 				Lnum:     0,
 				Text:     "<lambda>1:1:",
 			},
-			&Entry{
+			&Stack{
 				Funcname: "<SNR>2_test",
 				Flnum:    1,
 				Line:     "  return s:d.f()",
@@ -189,14 +189,14 @@ endfunction
 				Lnum:     8,
 				Text:     "<SNR>2_test:1:  return s:d.f()",
 			},
-			&Entry{
+			&Stack{
 				Funcname: "{1}",
 				Flnum:    1,
 				Line:     "  return s:test2()",
 				Filename: filename,
 				Text:     "{1}:1:  return s:test2()",
 			},
-			&Entry{
+			&Stack{
 				Funcname: "<SNR>2_test2",
 				Flnum:    1,
 				Line:     `  return printf('%s[%s]', expand('<sfile>'), expand('<slnum>'))`,
@@ -218,16 +218,16 @@ endfunction
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(got, want) {
-		for i, e := range got.Entries {
-			if !reflect.DeepEqual(e, want.Entries[i]) {
+		for i, e := range got.Stacks {
+			if !reflect.DeepEqual(e, want.Stacks[i]) {
 				t.Errorf("got :%#v", e)
-				t.Errorf("want:%#v", want.Entries[i])
+				t.Errorf("want:%#v", want.Stacks[i])
 			}
 		}
 	}
 }
 
-func TestVim_buildFileEntry(t *testing.T) {
+func TestVim_buildFileStack(t *testing.T) {
 	v := &Vim{c: cli}
 	scripts := `line1
 line2
@@ -245,24 +245,24 @@ line3
 
 	tests := []struct {
 		lnum int
-		want *Entry
+		want *Stack
 	}{
-		{lnum: 1, want: &Entry{Lnum: 1, Line: "line1", Text: "line1", Filename: filename}},
-		{lnum: 4, want: &Entry{Lnum: 4, Line: "   line4", Text: "   line4", Filename: filename}},
+		{lnum: 1, want: &Stack{Lnum: 1, Line: "line1", Text: "line1", Filename: filename}},
+		{lnum: 4, want: &Stack{Lnum: 4, Line: "   line4", Text: "   line4", Filename: filename}},
 	}
 	for _, tt := range tests {
-		got, err := v.buildFileEntry(filename, tt.lnum)
+		got, err := v.buildFileStack(filename, tt.lnum)
 		if err != nil {
 			t.Error(err)
 		}
 		if !reflect.DeepEqual(got, tt.want) {
-			t.Errorf("Vim.buildFileEntry(%v) = %#+v, want %#+v", tt.lnum, got, tt.want)
+			t.Errorf("Vim.buildFileStack(%v) = %#+v, want %#+v", tt.lnum, got, tt.want)
 		}
 	}
 
 }
 
-func TestSeparateEntry(t *testing.T) {
+func TestSeparateStack(t *testing.T) {
 	tests := []struct {
 		in       string
 		wantBody string
@@ -300,8 +300,8 @@ func TestSeparateEntry(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		if gotBody, gotLnum := separateEntry(tt.in); gotBody != tt.wantBody || gotLnum != tt.wantLnum {
-			t.Errorf("separateEntry(%v) = (%v, %v), want (%v, %v)", tt.in, gotBody, gotLnum, tt.wantBody, tt.wantLnum)
+		if gotBody, gotLnum := separateStack(tt.in); gotBody != tt.wantBody || gotLnum != tt.wantLnum {
+			t.Errorf("separateStack(%v) = (%v, %v), want (%v, %v)", tt.in, gotBody, gotLnum, tt.wantBody, tt.wantLnum)
 		}
 	}
 }

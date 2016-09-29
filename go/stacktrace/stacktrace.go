@@ -24,21 +24,24 @@ type Err struct {
 }
 
 type Stacktrace struct {
-	Entries []*Entry `json:"entries"`
+	Stacks []*Stack `json:"stacks"`
 }
 
-type Entry struct {
+// Stack represents a stack of stacktrace.
+// The field names are compatible with quickfix and location list. :h setqflist()
+type Stack struct {
 	// Function name including <SNR> for script local function
-	Funcname string `json:"funcname"`
+	Funcname string `json:"funcname,omitempty"`
 
 	// The line number relative to the start of the function
-	Flnum int `json:"flnum"`
+	Flnum int `json:"flnum,omitempty"`
 
 	// Line text. It's empty if the func is lambda or partial
 	Line string `json:"line,omitempty"`
 
 	// Filename is empty if func is defined in Ex-command line
 	Filename string `json:"filename,omitempty"`
+
 	// The line number relative to the start of the file
 	Lnum int `json:"lnum,omitempty"`
 
@@ -94,12 +97,12 @@ var fileThrowpointRegex = regexp.MustCompile(`\[\d+]$`)
 func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	if !strings.HasPrefix(throwpoint, "function ") {
 		if fileThrowpointRegex.MatchString(throwpoint) {
-			fname, lnum := separateEntry(throwpoint)
-			e, err := cli.buildFileEntry(fname, lnum)
+			fname, lnum := separateStack(throwpoint)
+			e, err := cli.buildFileStack(fname, lnum)
 			if err != nil {
 				return nil, err
 			}
-			return &Stacktrace{Entries: []*Entry{e}}, nil
+			return &Stacktrace{Stacks: []*Stack{e}}, nil
 		}
 		return nil, fmt.Errorf("invalid throwpoint")
 	}
@@ -108,23 +111,23 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	fileFuncLines = make(map[string]map[string]int)
 	fileFuncLinesMu.Unlock()
 
-	var es []*Entry
+	var es []*Stack
 	ss := strings.Split(throwpoint[len("function "):], "..")
 	for _, e := range ss {
-		funcname, flnum := separateEntry(e)
-		e, err := cli.buildFuncEntry(funcname, flnum)
+		funcname, flnum := separateStack(e)
+		e, err := cli.buildFuncStack(funcname, flnum)
 		if err != nil {
 			return nil, err
 		}
 		es = append(es, e)
 	}
-	return &Stacktrace{Entries: es}, nil
+	return &Stacktrace{Stacks: es}, nil
 }
 
-// separateEntry separtes entry which form is body[lnum] and return (body, lnum)
+// separateStack separtes stack entry which form is body[lnum] and return (body, lnum)
 // funcname[1] -> (funcname, 1)
 // file[1] -> (file, 1)
-func separateEntry(e string) (string, int) {
+func separateStack(e string) (string, int) {
 	i := strings.LastIndex(e, "[")
 	body := e
 	line := 0
@@ -170,8 +173,8 @@ func normalizeThrowpoint(throwpoint string) string {
 
 var allNumRegex = regexp.MustCompile(`^\d+$`)
 
-func (cli *Vim) buildFileEntry(filename string, lnum int) (*Entry, error) {
-	e := &Entry{
+func (cli *Vim) buildFileStack(filename string, lnum int) (*Stack, error) {
+	e := &Stack{
 		Filename: filename,
 		Lnum:     lnum,
 	}
@@ -195,13 +198,13 @@ func (cli *Vim) buildFileEntry(filename string, lnum int) (*Entry, error) {
 	return e, nil
 }
 
-func (cli *Vim) buildFuncEntry(funcname string, flnum int) (*Entry, error) {
+func (cli *Vim) buildFuncStack(funcname string, flnum int) (*Stack, error) {
 	// convert funcname for dict func
 	if allNumRegex.MatchString(funcname) {
 		funcname = fmt.Sprintf("{%v}", funcname)
 	}
 
-	e := &Entry{
+	e := &Stack{
 		Funcname: funcname,
 		Flnum:    flnum,
 		Text:     fmt.Sprintf("%s:%d:", funcname, flnum),
