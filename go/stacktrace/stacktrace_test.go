@@ -210,7 +210,7 @@ endfunction
 
 	want := &Stacktrace{
 		Stacks: []*Stack{
-			&Stack{
+			{
 				Funcname: "F",
 				Flnum:    2,
 				Line:     "  return l:G()",
@@ -218,7 +218,7 @@ endfunction
 				Lnum:     4,
 				Text:     "F:2:  return l:G()",
 			},
-			&Stack{
+			{
 				Funcname: "<lambda>1",
 				Flnum:    1,
 				Line:     "",
@@ -226,7 +226,7 @@ endfunction
 				Lnum:     0,
 				Text:     "<lambda>1:1:",
 			},
-			&Stack{
+			{
 				Funcname: "<SNR>2_test",
 				Flnum:    1,
 				Line:     "  return s:d.f()",
@@ -234,14 +234,14 @@ endfunction
 				Lnum:     8,
 				Text:     "<SNR>2_test:1:  return s:d.f()",
 			},
-			&Stack{
+			{
 				Funcname: "{1}",
 				Flnum:    1,
 				Line:     "  return s:test2()",
 				Filename: filename,
 				Text:     "{1}:1:  return s:test2()",
 			},
-			&Stack{
+			{
 				Funcname: "<SNR>2_test2",
 				Flnum:    1,
 				Line:     `  return printf('%s[%s]', expand('<sfile>'), expand('<slnum>'))`,
