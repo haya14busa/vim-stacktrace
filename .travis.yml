@@ -4,20 +4,20 @@ go:
   - 1.7
   - tip
 
+os:
+  - linux
+#   - osx
+# osx_image: xcode8
+
 install:
-  - go get -d -v -t ./...
-  - go get github.com/mattn/goveralls
-  - go get github.com/golang/lint/golint
-  - go get honnef.co/go/unused/cmd/unused
+  - make deps
+  - bash .ci/install.sh
+  - export PATH=$HOME/vim/bin:$PATH
 
 before_script:
-  - vim --cmd version --cmd quit
+  - make check
 
 script:
-  # - go test -v -race ./...
+  - make lint
+  - make test
   - goveralls -service=travis-ci
-  - go vet ./...
-  - golint -set_exit_status ./...
-  - unused ./...
-  - (! gofmt -s -d -l . 2>&1 | grep '^')
-  - (! goimports -l . 2>&1 | grep '^')
