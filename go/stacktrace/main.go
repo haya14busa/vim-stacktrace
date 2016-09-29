@@ -11,6 +11,11 @@ import (
 
 var homedir string
 
+func init() {
+	usr, _ := user.Current()
+	homedir = usr.HomeDir
+}
+
 type myHandler struct{}
 
 func (h *myHandler) Serve(cli *vim.Client, msg *vim.Message) {
@@ -56,9 +61,6 @@ func (cli *Vim) handle(msgBody vim.Body) (interface{}, error) {
 
 // Main func.
 func Main() {
-	usr, _ := user.Current()
-	homedir = usr.HomeDir
-
 	handler := &myHandler{}
 	cli := vim.NewClient(vim.NewReadWriter(os.Stdin, os.Stdout), handler)
 	log.Fatal(cli.Start())
