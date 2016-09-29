@@ -134,10 +134,6 @@ func Histerrs(msghist string) []*Error {
 	return errors
 }
 
-var inputlist = func(cli *Vim, candidates []string) (int, error) {
-	return cli.callintfunc("inputlist", candidates)
-}
-
 // Fromhist returns selected stacktrace from errors in message history.
 //
 // vimdoc:func:
