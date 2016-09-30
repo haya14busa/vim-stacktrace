@@ -277,11 +277,7 @@ line3
 		{lnum: 4, want: &Stack{Lnum: 4, Line: "   line4", Text: "   line4", Filename: filename}},
 	}
 	for _, tt := range tests {
-		got, err := v.buildFileStack(filename, tt.lnum)
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(got, tt.want) {
+		if got := v.buildFileStack(filename, tt.lnum); !reflect.DeepEqual(got, tt.want) {
 			t.Errorf("Vim.buildFileStack(%v) = %#+v, want %#+v", tt.lnum, got, tt.want)
 		}
 	}

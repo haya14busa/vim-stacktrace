@@ -88,10 +88,7 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	if !strings.HasPrefix(throwpoint, "function ") {
 		if fileThrowpointRegex.MatchString(throwpoint) {
 			fname, lnum := separateStack(throwpoint)
-			e, err := cli.buildFileStack(fname, lnum)
-			if err != nil {
-				return nil, err
-			}
+			e := cli.buildFileStack(fname, lnum)
 			return &Stacktrace{Stacks: []*Stack{e}}, nil
 		}
 		return nil, fmt.Errorf("invalid throwpoint")
@@ -173,14 +170,14 @@ func normalizeThrowpoint(throwpoint string) string {
 
 var allNumRegex = regexp.MustCompile(`^\d+$`)
 
-func (cli *Vim) buildFileStack(filename string, lnum int) (*Stack, error) {
+func (cli *Vim) buildFileStack(filename string, lnum int) *Stack {
 	e := &Stack{
 		Filename: filename,
 		Lnum:     lnum,
 	}
 	f, err := os.Open(filename)
 	if err != nil {
-		return e, nil
+		return e
 	}
 	defer f.Close()
 
@@ -195,7 +192,7 @@ func (cli *Vim) buildFileStack(filename string, lnum int) (*Stack, error) {
 		}
 	}
 
-	return e, nil
+	return e
 }
 
 func (cli *Vim) buildFuncStack(funcname string, flnum int) (*Stack, error) {
