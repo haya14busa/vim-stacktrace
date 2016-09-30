@@ -6,10 +6,36 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	vim "github.com/haya14busa/vim-go-client"
 )
+
+func TestVim_callstack(t *testing.T) {
+	v := &Vim{c: cli}
+	tests := []struct {
+		in   string
+		want *Stacktrace
+	}{
+		{
+			in:   "function F[14]..stacktrace#callstack",
+			want: &Stacktrace{Stacks: []*Stack{{Funcname: "F", Flnum: 14, Text: "F:14:"}}},
+		},
+	}
+	for _, tt := range tests {
+		got, err := v.callstack(tt.in)
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(got, tt.want) {
+			for i, e := range got.Stacks {
+				t.Errorf("got :%#v", e)
+				t.Errorf("want:%#v", tt.want.Stacks[i])
+			}
+		}
+	}
+}
 
 func TestVim_Build(t *testing.T) {
 	v := &Vim{c: cli}
@@ -99,6 +125,13 @@ func TestVim_Build(t *testing.T) {
 				t.Errorf("want:%#v", tt.want.Stacks[i])
 			}
 		}
+	}
+}
+
+func TestVim_Build_error(t *testing.T) {
+	v := &Vim{c: cli}
+	if got, err := v.Build("invalid"); err == nil {
+		t.Errorf("Vim.Build('invalid') = %v, but want err", got)
 	}
 }
 
@@ -277,11 +310,7 @@ line3
 		{lnum: 4, want: &Stack{Lnum: 4, Line: "   line4", Text: "   line4", Filename: filename}},
 	}
 	for _, tt := range tests {
-		got, err := v.buildFileStack(filename, tt.lnum)
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(got, tt.want) {
+		if got := v.buildFileStack(filename, tt.lnum); !reflect.DeepEqual(got, tt.want) {
 			t.Errorf("Vim.buildFileStack(%v) = %#+v, want %#+v", tt.lnum, got, tt.want)
 		}
 	}
@@ -333,7 +362,6 @@ func TestSeparateStack(t *testing.T) {
 }
 
 func TestNormalizeThrowpoint(t *testing.T) {
-
 	tests := []struct {
 		in   string
 		want string
@@ -360,5 +388,61 @@ func TestNormalizeThrowpoint(t *testing.T) {
 		if got2 := normalizeThrowpoint(got); got2 != tt.want {
 			t.Errorf("normalizeThrowpoint(%v) = %v, tt.want %v", got, got2, tt.want)
 		}
+	}
+}
+
+func TestExpandpath(t *testing.T) {
+	got := expandpath("~/.vimrc")
+	if !strings.HasSuffix(got, "/.vimrc") {
+		t.Errorf("expandpath(~/.vimrc) = %v, suffix should be %v", got, "/.vimrc")
+	}
+}
+
+func TestVim_funcLnum(t *testing.T) {
+	scripts := `
+function! F() abort
+endfunction
+function! s:f() abort
+endfunction
+`
+	tmp, _ := ioutil.TempFile("", "vim-stacktrace-test")
+	defer tmp.Close()
+	defer os.Remove(tmp.Name())
+	tmp.WriteString(scripts)
+	filename := tmp.Name()
+
+	cli, closer, err := vim.NewChildClient(&testHandler{}, vimArgs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer closer.Close()
+	v := &Vim{c: cli}
+	tests := []struct {
+		funcname, filename string
+		want               int
+	}{
+		{"F", "notfound.txt", 0},
+		{"s:f", filename, 4},
+		{"<SNR>14_f", filename, 4},
+		{"<SNR>f", filename, 0},
+	}
+	for _, tt := range tests {
+		if got := v.funcLnum(tt.funcname, tt.filename); got != tt.want {
+			t.Errorf("Vim.funcLnum(%v, %v) = %v, got %v", tt.funcname, tt.filename, got, tt.want)
+		}
+	}
+}
+
+func TestVim_funcLnum_parseerror(t *testing.T) {
+	scripts := `return invalid`
+	tmp, _ := ioutil.TempFile("", "vim-stacktrace-test")
+	defer tmp.Close()
+	defer os.Remove(tmp.Name())
+	tmp.WriteString(scripts)
+	filename := tmp.Name()
+	v := &Vim{c: cli}
+	want := 0
+	if got := v.funcLnum("F", filename); got != want {
+		t.Errorf("Vim.funcLnum(%v, %v) = %v, got %v", "F", filename, got, want)
 	}
 }

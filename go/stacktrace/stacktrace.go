@@ -76,7 +76,13 @@ func (cli *Vim) Callstack() (*Stacktrace, error) {
 	if err != nil {
 		return nil, err
 	}
+	return cli.callstack(sfile)
+}
+
+// callstack returns callstack from <sfile> from stacktrace#callstack().
+func (cli *Vim) callstack(sfile string) (*Stacktrace, error) {
 	ss := strings.Split(sfile, "..")
+	// drop last callstack because it's from stacktrace#callstack().
 	throwpoint := strings.Join(ss[:len(ss)-1], "..")
 	return cli.build(throwpoint)
 }
@@ -88,10 +94,7 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	if !strings.HasPrefix(throwpoint, "function ") {
 		if fileThrowpointRegex.MatchString(throwpoint) {
 			fname, lnum := separateStack(throwpoint)
-			e, err := cli.buildFileStack(fname, lnum)
-			if err != nil {
-				return nil, err
-			}
+			e := cli.buildFileStack(fname, lnum)
 			return &Stacktrace{Stacks: []*Stack{e}}, nil
 		}
 		return nil, fmt.Errorf("invalid throwpoint")
@@ -105,11 +108,7 @@ func (cli *Vim) build(throwpoint string) (*Stacktrace, error) {
 	ss := strings.Split(throwpoint[len("function "):], "..")
 	for _, e := range ss {
 		funcname, flnum := separateStack(e)
-		e, err := cli.buildFuncStack(funcname, flnum)
-		if err != nil {
-			return nil, err
-		}
-		es = append(es, e)
+		es = append(es, cli.buildFuncStack(funcname, flnum))
 	}
 	return &Stacktrace{Stacks: es}, nil
 }
@@ -173,14 +172,14 @@ func normalizeThrowpoint(throwpoint string) string {
 
 var allNumRegex = regexp.MustCompile(`^\d+$`)
 
-func (cli *Vim) buildFileStack(filename string, lnum int) (*Stack, error) {
+func (cli *Vim) buildFileStack(filename string, lnum int) *Stack {
 	e := &Stack{
 		Filename: filename,
 		Lnum:     lnum,
 	}
 	f, err := os.Open(filename)
 	if err != nil {
-		return e, nil
+		return e
 	}
 	defer f.Close()
 
@@ -195,10 +194,10 @@ func (cli *Vim) buildFileStack(filename string, lnum int) (*Stack, error) {
 		}
 	}
 
-	return e, nil
+	return e
 }
 
-func (cli *Vim) buildFuncStack(funcname string, flnum int) (*Stack, error) {
+func (cli *Vim) buildFuncStack(funcname string, flnum int) *Stack {
 	// convert funcname for dict func
 	if allNumRegex.MatchString(funcname) {
 		funcname = fmt.Sprintf("{%v}", funcname)
@@ -213,7 +212,7 @@ func (cli *Vim) buildFuncStack(funcname string, flnum int) (*Stack, error) {
 	f, err := cli.function(funcname)
 	if err != nil {
 		// It failse for lambda and partial
-		return e, nil
+		return e
 	}
 	lines := strings.Split(strings.Trim(f, "\n"), "\n")
 
@@ -221,10 +220,7 @@ func (cli *Vim) buildFuncStack(funcname string, flnum int) (*Stack, error) {
 	// set from
 	file := ""
 	if strings.HasPrefix(lines[1], "\tLast set from ") {
-		file = lines[1][len("\tLast set from "):]
-		if strings.HasPrefix(file, "~/") {
-			file = strings.Replace(file, "~", homedir, 1)
-		}
+		file = expandpath(lines[1][len("\tLast set from "):])
 		l := make([]string, 0, len(lines)-1)
 		l = append(l, lines[0])
 		l = append(l, lines[1:]...)
@@ -250,7 +246,14 @@ func (cli *Vim) buildFuncStack(funcname string, flnum int) (*Stack, error) {
 		}
 	}
 
-	return e, nil
+	return e
+}
+
+func expandpath(p string) string {
+	if strings.HasPrefix(p, "~/") {
+		p = strings.Replace(p, "~", homedir, 1)
+	}
+	return p
 }
 
 func (cli *Vim) funcLnum(funcname, file string) int {
