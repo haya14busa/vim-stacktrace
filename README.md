@@ -6,6 +6,10 @@
 [![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![GoDoc](https://godoc.org/github.com/haya14busa/vim-stacktrace/go/stacktrace?status.svg)](https://godoc.org/github.com/haya14busa/vim-stacktrace/go/stacktrace)
 
+![vim-stacktrace.logo.png (658×433)](https://raw.githubusercontent.com/haya14busa/i/075cce52e2758e2fd2158ee85e3a070c9603fa83/vim-stacktrace/vim-stacktrace.logo.png)
+
+<small>Illust credit: [いらすとや](http://www.irasutoya.com/) / [tenntenn/gopher-stickers](https://github.com/tenntenn/gopher-stickers)</small>
+
 vim-stacktrace provides a way to get a callstack or build stacktrace by error information (e.g. `v:throwpoint`, error message).
 You can create quickfix list or location list from the result.
 
@@ -36,7 +40,7 @@ vim-stacktrace helps you to debug Vim script :bug: and to report a helpful error
 call dein#add('haya14busa/vim-stacktrace', {'build': 'make'})
 ```
 
-```
+```vim
 Plug 'haya14busa/vim-stacktrace', { 'do': 'make' }
 ```
 
