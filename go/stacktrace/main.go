@@ -40,33 +40,34 @@ func (cli *Vim) handle(msgBody vim.Body) (interface{}, error) {
 	if !ok {
 		return nil, fmt.Errorf("id field is not in message body: %v", body)
 	}
-	if s, ok := id.(string); ok {
-		switch s {
-		case "stacktrace#callstack":
-			return cli.Callstack()
-		case "stacktrace#build":
-			t, ok := body["throwpoint"]
-			if !ok {
-				return nil, fmt.Errorf("throwpoint is required in message body: %v", body)
-			} else if _, ok := t.(string); !ok {
-				return nil, fmt.Errorf("throwpoint is not string: %+v", t)
-			}
-			return cli.Build(t.(string))
-		case "stacktrace#histerrs":
-			t, ok := body["msghist"]
-			if !ok {
-				return nil, fmt.Errorf("msghist is required in message body: %v", body)
-			} else if _, ok := t.(string); !ok {
-				return nil, fmt.Errorf("msghist is not string: %+v", t)
-			}
-			return Histerrs(t.(string)), nil
-		case "stacktrace#fromhist":
-			return cli.Fromhist()
-		default:
-			return nil, fmt.Errorf("got an unexpected id: %v", s)
-		}
+	s, ok := id.(string)
+	if !ok {
+		return nil, fmt.Errorf("id is not string: %+v", id)
 	}
-	return nil, fmt.Errorf("id is not string: %+v", id)
+	switch s {
+	case "stacktrace#callstack":
+		return cli.Callstack()
+	case "stacktrace#build":
+		t, ok := body["throwpoint"]
+		if !ok {
+			return nil, fmt.Errorf("throwpoint is required in message body: %v", body)
+		} else if _, ok := t.(string); !ok {
+			return nil, fmt.Errorf("throwpoint is not string: %+v", t)
+		}
+		return cli.Build(t.(string))
+	case "stacktrace#histerrs":
+		t, ok := body["msghist"]
+		if !ok {
+			return nil, fmt.Errorf("msghist is required in message body: %v", body)
+		} else if _, ok := t.(string); !ok {
+			return nil, fmt.Errorf("msghist is not string: %+v", t)
+		}
+		return Histerrs(t.(string)), nil
+	case "stacktrace#fromhist":
+		return cli.Fromhist()
+	default:
+		return nil, fmt.Errorf("got an unexpected id: %v", s)
+	}
 }
 
 // Main func.
