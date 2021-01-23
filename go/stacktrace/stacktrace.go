@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 
-	vimlparser "github.com/haya14busa/go-vimlparser"
-	"github.com/haya14busa/go-vimlparser/ast"
 	vim "github.com/haya14busa/vim-go-client"
+	vimlparser "github.com/vim-jp/go-vimlparser"
+	"github.com/vim-jp/go-vimlparser/ast"
 )
 
 var (

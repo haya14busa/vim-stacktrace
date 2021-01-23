@@ -11,7 +11,7 @@ deps:
 	go get github.com/golang/lint/golint
 	go get golang.org/x/tools/cmd/goimports
 	go get honnef.co/go/unused/cmd/unused
-	go get github.com/haya14busa/go-vimlparser/cmd/vimlparser
+	go get github.com/vim-jp/go-vimlparser/cmd/vimlparser
 
 check:
 	uname -a

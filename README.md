@@ -50,7 +50,7 @@ vim-stacktrace demonstrates a feasibility to write Vim plugin in Go lang for Vim
 Libraries which helps me to write vim-stacktrace in Go lang.
 
 - [haya14busa/vim-go-client](https://github.com/haya14busa/vim-go-client) for communicating with Vim
-- [haya14busa/go-vimlparser](https://github.com/haya14busa/go-vimlparser) for creating rich stacktrace by parsing Vim script without any noticeable delay
+- [vim-jp/go-vimlparser](https://github.com/vim-jp/go-vimlparser) for creating rich stacktrace by parsing Vim script without any noticeable delay
 
 ### :bird: Author
 haya14busa (https://github.com/haya14busa)
